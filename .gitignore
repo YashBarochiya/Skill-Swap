@@ -1,0 +1,72 @@
+########################################
+# Node.js + React Monorepo .gitignore
+########################################
+
+# ==========================
+# Dependencies
+# ==========================
+node_modules/
+.pnp
+.pnp.js
+
+# ==========================
+# Build Output
+# ==========================
+build/
+dist/
+.cache/
+.next/
+out/
+
+# ==========================
+# Testing
+# ==========================
+coverage/
+
+# ==========================
+# Logs
+# ==========================
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ==========================
+# Environment Variables
+# ==========================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ==========================
+# Runtime Data
+# ==========================
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# ==========================
+# Temporary Files
+# ==========================
+.tmp
+temp
+
+# ==========================
+# OS / Editor Specific
+# ==========================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# ==========================
+# Database Dumps (MongoDB)
+# ==========================
+dump/
+data/
