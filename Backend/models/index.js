@@ -1,9 +1,9 @@
-const SwapRequest = require("./SwapRequest");
-
-module.export = {
-    User: required("./User"),
-    Review: requried("./Review"),
-    Swap: requried("./Swap"),
-    SwapRequest: requried("./SwapRequest"),
-    Skill: requried("./Skill"),
+module.exports = {
+    User: require("./User"),
+    Review: require("./Review"),
+    Swap: require("./Swap"),
+    SwapRequest: require("./SwapRequest"),
+    Skill: require("./Skill"),
+    Profile: require("./Profile"),
+    Message: require("./Message"),
 }
