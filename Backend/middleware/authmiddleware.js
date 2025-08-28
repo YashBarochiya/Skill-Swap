@@ -13,6 +13,7 @@ const authMiddleware = async (req, res, next) => {
 
     const user = await User.findById(decoded.id).select("-password");
     if (!user) return res.status(401).json({ message: "User not found" });
+    if (user.isBanned) return res.status(403).json({ message: "Your account is banned" });
 
     req.user = user; // attach full user info
     next();
@@ -21,14 +22,16 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-// ✅ Role check middleware
-const authorizeRoles = (...roles) => {
-  return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ message: "Forbidden: Insufficient permissions" });
-    }
-    next();
-  };
+const authorizeRoles = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized: Please log in first" });
+  }
+
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Forbidden: Insufficient permissions" });
+  }
+
+  next();
 };
 
 module.exports = { authMiddleware, authorizeRoles };

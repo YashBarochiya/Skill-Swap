@@ -5,6 +5,7 @@ const messageSchema = mongoose.Schema({
   receiver: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   content: { type: String, required: true },
   swap: { type: mongoose.Schema.Types.ObjectId, ref: "Swap" }, // optional, link to swap
+  read: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 

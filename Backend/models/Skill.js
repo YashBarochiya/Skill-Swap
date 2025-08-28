@@ -5,6 +5,7 @@ const skillSchema = mongoose.Schema({
     description: String,
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     level:{type: String, enum:["Beginner","Intermediate","Expert"], requried:true},
+    category:{type: String, required: true, default:"newCategory"},
     createdAt:{type:Date, default:Date.now}
 })
 

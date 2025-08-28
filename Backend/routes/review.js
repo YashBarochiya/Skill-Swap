@@ -12,4 +12,7 @@ router.get("/:userId", reviewController.getReviewsForUser);
 
 // See own reviews
 router.get("/me/all", authMiddleware.authMiddleware, reviewController.getMyReviews);
+
+// update the review
+router.post("/update", authMiddleware.authMiddleware, reviewController.updateMyReviews);
 module.exports = router;

@@ -1,3 +1,5 @@
+
+const Message = require("../models/Message");
 // socket/chatSocket.js
 module.exports = (io) => {
   io.on("connection", (socket) => {
@@ -17,8 +19,19 @@ module.exports = (io) => {
       io.to(swapId).emit("receiveMessage", msg);
     });
 
-    socket.on("disconnect", () => {
-      console.log("❌ User disconnected:", socket.id);
-    });
+    socket.on("markAsRead", async ({ swapId, userId }) => {
+        const result = await Message.updateMany(
+    {
+       swapId,                   // mongoose auto-casts string → ObjectId
+    receiver: req.user.id,
+    read: false,
+    },
+    { $set: { read: true } }
+  );
+
+  // notify both users
+  io.to(swapId.toString()).emit("messagesRead", { swapId, userId });
+});
+
   });
 };

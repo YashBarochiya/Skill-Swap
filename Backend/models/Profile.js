@@ -24,8 +24,7 @@ const ProfileSchema = new mongoose.Schema(
     // Skills user wants to learn
     learnSkills: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Skill",
+        type: String,
       },
     ],
     experience: [

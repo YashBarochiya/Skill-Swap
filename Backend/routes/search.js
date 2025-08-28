@@ -6,6 +6,6 @@ const matchController = require("../controllers/matchcontroller");
 const authMiddleware = require("../middleware/authmiddleware");
 
 router.get("/", searchController.searchProfiles);
-router.get("/matches", authMiddleware.authMiddleware, matchController.findMatches);
+router.get("/matches", authMiddleware.authMiddleware, matchController.matchUsers);
 
 module.exports = router;

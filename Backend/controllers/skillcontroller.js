@@ -1,6 +1,8 @@
 const Skill = require("../models/Skill");
 const User = require("../models/User");
 const Profile = require("../models/Profile");
+const { createSearchIndex } = require("../models/Swap");
+const Category = require("../models/Category");
 
 exports.getallSkill = async (req,res)=>{
   try{
@@ -14,20 +16,24 @@ exports.getallSkill = async (req,res)=>{
 // Add a new skill
 exports.addSkill = async (req, res) => {
   try {
-    const { name, description, level } = req.body;
+    const { skillname, description, level } = req.body;
     const userId = req.user._id; 
     
-    const existingSkill = await Skill.findOne({ name, level, user: userId });
+    const existingSkill = await Skill.findOne({ name:skillname, level, user: userId });
     if (existingSkill) {
       return res.status(400).json({ message: "Skill with this name and level already exists" });
     }
+    const category = await Category.findOne({
+      skills: { $in: [new RegExp(skillname, "i")] }
+    }).select("name _id");
 
 
     const skill = await Skill.create({
-      name,
+      name:skillname,
       description,
       level,
-      user: userId
+      user: userId,
+      category:category?category.name:"newCategory",
     });
 
     await Profile.findOneAndUpdate(
@@ -112,3 +118,58 @@ exports.deleteSkill = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.addlearnSkill = async (req,res) => {
+try {
+    const userId = req.user.id; // from auth middleware
+    const { skillName } = req.body;
+
+    if (!skillName) {
+      return res.status(400).json({ message: "Skill name is required" });
+    }
+    // 1️⃣ Find the user profile
+    let profile = await Profile.findOne({ user: userId });
+    if (!profile) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+
+    // 2️⃣ Prevent duplicates
+    if (profile.learnSkills.includes(skillName)) {
+      return res.status(400).json({ message: "Skill already added in learnSkills" });
+    }
+
+    // 3️⃣ Add the skill
+    profile.learnSkills.push(skillName);
+    await profile.save();
+
+    res.json({
+      message: "Skill added to learnSkills",
+      profile,
+    });
+  }catch(error){
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+exports.deletelearnSkill = async (req,res)=>{
+  try{const userId = req.user.id;
+  const {skillName} = req.body;
+  if(!skillName){
+    res.status(404).json({message:"select Skill first"});
+  }
+  const profile = await Profile.findOne({user:userId});
+  if(!profile){
+    res.status(404).json({message:"Profile not found"});
+  }
+  if(!profile.learnSkills.includes(skillName)){
+    res.status(400).json({message:"You can delete skill which is only present in learnskill"});
+  }
+  profile.learnSkills = profile.learnSkills.filter(
+    (s) => s !== skillName
+  );
+  profile.save();
+  res.status(200).json({ message: "Skill removed from learnSkills", profile });
+}catch(error){
+res.status(500).json({ message: "Server Error", profile });
+}
+}
