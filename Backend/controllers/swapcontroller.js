@@ -13,7 +13,7 @@ exports.getMySwaps = async (req, res) => {
       .populate("skillFromUser1 skillFromUser2", "name level description")
       .sort({ createdAt: -1 });
 
-    res.json(swaps);
+    res.status(200).json(swaps);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

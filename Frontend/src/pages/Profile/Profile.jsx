@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api/client";
+import api from "../../api/client";
 
 export default function Profile() {
   const [profile, setProfile] = useState(null);
@@ -24,7 +24,8 @@ export default function Profile() {
   return (
     <div className="max-w-2xl mx-auto p-4">
       <h1 className="text-2xl mb-4">My Profile</h1>
-
+      <p><strong>Name:</strong> {profile.user.name || "N/A"}</p>
+      <p><strong>Name:</strong> {profile.user.email || "N/A"}</p>
       <p><strong>Bio:</strong> {profile.bio || "N/A"}</p>
       <p><strong>Location:</strong> {profile.location || "N/A"}</p>
 
@@ -56,7 +57,7 @@ export default function Profile() {
       </div>
 
       <button
-        onClick={() => navigate("/update-profile")}
+         onClick={() => navigate(`/update-profile/${profile._id}`)}
         className="mt-6 bg-blue-500 text-white px-4 py-2 rounded"
       >
         Update Profile

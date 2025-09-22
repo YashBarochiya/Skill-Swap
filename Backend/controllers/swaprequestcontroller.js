@@ -1,19 +1,20 @@
 
 const SwapRequest = require("../models/SwapRequest");
-const Swap = require("../models/Swap")
+const Swap = require("../models/Swap");
+const User = require("../models/User");
 
 exports.createSwapRequest = async (req,res)=>{
     try {
-    const { toUser, offeredSkill, requestedSkill,durationInDays } = req.body;
+    const { toUser, offeredSkill, requestedSkill } = req.body;
 
+    const findReceiverUser = await User.findById(toUser);
+    if(!findReceiverUser) return res.status(400).json({message:"Receiver not found"});
     if (req.user.id === toUser) {
       return res.status(400).json({ message: "You cannot send request to yourself" });
     }
 
-    let days = durationInDays || 3; // default = 3 days
-    if (days > 5) days = 5;         // cap at 5 days
 
-    const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
 
 
     const newRequest = await SwapRequest.create({
@@ -36,7 +37,7 @@ exports.receivedRequest = async (req, res) => {
       .populate("fromUser", "name email")
       .populate("offeredSkill requestedSkill", "name level");
 
-    res.json(requests);
+    res.status(200).json(requests);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -45,10 +46,12 @@ exports.receivedRequest = async (req, res) => {
 exports.sentRequest = async (req, res) => {
   try {
     const requests = await SwapRequest.find({ fromUser: req.user.id })
+      .populate("fromUser","name email")
       .populate("toUser", "name email")
-      .populate("offeredSkill requestedSkill", "name level");
+      .populate("offeredSkill requestedSkill", "name level")
+      .populate("requestedSkill","name level");
 
-    res.json(requests);
+    res.status(200).json(requests);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -64,6 +67,7 @@ exports.updateRequestStatus = async (req, res) => {
     }
 
     const request = await SwapRequest.findById(id);
+    console.log(request);
     if (!request) return res.status(404).json({ message: "Request not found" });
     if (new Date() > request.expiresAt) {
     return res.status(400).json({ message: "This swap request has expired (max 5 days validity)" });
@@ -85,7 +89,7 @@ exports.updateRequestStatus = async (req, res) => {
     }
 
     if (request.status !== "pending") {
-      return res.status(400).json({ message: "Only pending requests can be updated." });
+      return res.status(401).json({ message: "Only pending requests can be updated." });
     }
 
     request.status = status;
@@ -103,7 +107,7 @@ exports.updateRequestStatus = async (req, res) => {
         completedBy:[],
       });
 
-      return res.json({ message: "Request accepted. Swap created.", request, swap });
+      return res.status(200).json({ message: "Request accepted. Swap created.", request, swap });
     }
 
     res.json({ message: `Request ${status}`, request });

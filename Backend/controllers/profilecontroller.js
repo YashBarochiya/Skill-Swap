@@ -14,9 +14,10 @@ exports.upsertProfile = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const { bio, location, experience } = req.body;
+    const { bio, location, experience,learnSkills } = req.body;
     let profile = await Profile.findOne({ user: userId });
-
+    if(!profile) return res.status(404).json({ message: "Profile not found" });
+    console.log("find profile")
     if (
       profile.user.toString() !== req.user._id.toString() &&
       req.user.role !== "admin"
@@ -25,16 +26,19 @@ exports.upsertProfile = async (req, res) => {
         .status(403)
         .json({ message: "Not authorized to Update this Profile" });
     }
+    console.log("authorized")
 
     if (profile) {
       profile.bio = bio || profile.bio;
       profile.location = location || profile.location;
       profile.experience = experience || profile.experience;
+      profile.learnSkills = learnSkills || profile.learnSkills
       await profile.save();
       return res.status(200).json({ message: "Profile updated", profile });
     }
   } catch (err) {
     res.status(500).json({ message: err.message });
+    console.log(err.message)
   }
 };
 
@@ -43,8 +47,7 @@ exports.getMyProfile = async (req, res) => {
   try {
     const profile = await Profile.findOne({ user: req.user.id })
       .populate("user", "name email")
-      .populate("teachSkills","name level")
-      .select("-_id -user");
+      .populate("teachSkills","name level");
     if (!profile) return res.status(404).json({ message: "Profile not found" });
     res.json(profile);
   } catch (err) {
@@ -55,13 +58,14 @@ exports.getMyProfile = async (req, res) => {
 // Get Profile by User ID (public)
 exports.getProfileByUserId = async (req, res) => {
   try {
-    const user = await User.findOne({ name: req.params.userId });
-    const profile = await Profile.findOne({ user: user._id })
+    const {userId} = req.params
+    const profile = await Profile.findOne({user:userId})
       .populate("user","name email")
       .populate("teachSkills","name level")
     if (!profile) return res.status(404).json({ message: "Profile not found" });
     res.json(profile);
   } catch (err) {
     res.status(500).json({ message: err.message });
+    console.log(err.message)
   }
 };

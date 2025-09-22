@@ -6,7 +6,7 @@ const Profile = require("../models/Profile");
 exports.addReview = async (req, res) => {
   try {
     const { swapId, revieweeId, rating, comment } = req.body;
-
+    
     if (req.user.id === revieweeId) {
       return res.status(400).json({ message: "You cannot review yourself" });
     }
@@ -14,7 +14,7 @@ exports.addReview = async (req, res) => {
     const swap = await Swap.findById(swapId);
     if (!swap) return res.status(404).json({ message: "Swap not found" });
     if (swap.status !== "completed") {
-      return res.status(400).json({ message: "You can only review completed swaps" });
+      return res.status(400).json({ message: "Swap is not completed" });
     }
 
     if (![swap.fromUser.toString(), swap.toUser.toString()].includes(req.user.id)) {
@@ -59,15 +59,10 @@ exports.getReviewsForUser = async (req, res) => {
   try {
     const reviews = await Review.find({ reviewee: req.params.userId })
       .populate("reviewer", "name email")
-      .populate("swap", "title status");
-
-    const profile = await Profile.findOne({ user: req.params.userId }).populate("user", "name email");
+      .populate("reviewee", "name email");
 
     res.json({
-      user: profile.user,
-      averageRating: profile.averageRating,
-      totalReviews: profile.totalReviews,
-      reviews,
+      reviews
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -77,16 +72,14 @@ exports.getReviewsForUser = async (req, res) => {
 //  Get logged-in user's own reviews
 exports.getMyReviews = async (req, res) => {
   try {
-    const reviews = await Review.find({ reviewee: req.user.id })
-      .populate("reviewer", "name email")
-      .populate("swap", "title status");
+    const reviews = await Review.find({ reviewer: req.user.id })
+      .populate("reviewee", "name email")
+      .populate("reviewer","name email");
 
     const profile = await Profile.findOne({ user: req.user.id }).populate("user", "name email");
 
     res.json({
-      user: profile.user,
-      averageRating: profile.averageRating,
-      totalReviews: profile.totalReviews,
+      
       reviews,
     });
   } catch (err) {

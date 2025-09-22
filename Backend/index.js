@@ -27,7 +27,7 @@ app.use(cors({
 }));
 require("./socket/chatsocket")(io);
 app.use(express.json());
-
+app.use(express.urlencoded({ extended: true }));
 
 
 app.use("/api/auth", authRoutes); //all route work properly

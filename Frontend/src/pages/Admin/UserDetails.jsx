@@ -61,6 +61,22 @@ export default function UserDetails() {
         )}
       </div>
 
+      {/* Teach Skills */}
+      <div className="border rounded-lg p-4 shadow-md">
+        <h2 className="text-xl font-bold mb-2">Teach Skills</h2>
+        {profiledata?.learnSkills?.length > 0 ? (
+          <ul className="list-disc list-inside">
+            {profiledata.learnSkills.map((skill, idx) => (
+              <li key={idx}>
+                {skill}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No teach skills</p>
+        )}
+      </div>
+
       {/* Swaps */}
       <div className="border rounded-lg p-4 shadow-md">
         <h2 className="text-xl font-bold mb-2">Swaps</h2>
